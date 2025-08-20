@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Checklist de Atividades</title>
+  <style>
+    :root{
+      /* Paleta azul petróleo */
+      --bg:#f2f6f7; --surface:#ffffff; --ink:#1c2a2f; --muted:#4d636b; --line:#c2d4d9;
+      --accent:#245c69; --accent-2:#2f7a89; --ok:#2a9daf;
+      --radius:10px;
+    }
+    [data-theme="dark"]{
+      --bg:#0d1416; --surface:#182224; --ink:#e0edef; --muted:#8ba0a6; --line:#2a3a3f;
+      --accent:#2f7a89; --accent-2:#3e9cab; --ok:#2a9daf;
+    }
+
+    *{box-sizing:border-box}
+    body{margin:0; color:var(--ink); background:var(--bg);
+      font:16px/1.55 Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+    .container{max-width:860px; margin:auto; padding:20px 16px 56px}
+
+    .header{position:sticky; top:0; z-index:10; border-bottom:1px solid var(--line); background:var(--surface)}
+    .header-inner{max-width:860px; margin:auto; padding:10px 16px; display:flex; gap:12px; align-items:center; justify-content:space-between}
+    .title{font-size:18px; font-weight:800}
+
+    .toolbar{display:flex; gap:4px; flex-wrap:wrap; align-items:center; font-size:13px}
+    .btn{border:1px solid var(--line); background:var(--surface); color:var(--ink); padding:4px 8px; border-radius:6px; cursor:pointer; font-size:13px}
+    .btn:hover{background:color-mix(in srgb, var(--surface) 90%, var(--accent) 10%)}
+
+    .search{flex:1; min-width:180px}
+    .search input{width:100%; padding:6px 10px; border-radius:6px; border:1px solid var(--line); background:var(--surface); color:var(--ink); font-size:13px}
+
+    .overall{border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); padding:12px; margin-top:14px}
+    .meta{margin-top:6px; font-size:12px; color:var(--muted)}
+    .progress{height:6px; background:color-mix(in srgb, var(--bg) 70%, var(--surface) 30%); border-radius:999px; overflow:hidden; border:1px solid var(--line)}
+    .progress>i{display:block; height:100%; width:0%; background:linear-gradient(90deg, var(--ok), var(--accent-2) 60%, var(--accent) 100%)}
+
+    details.section{border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); margin-top:10px}
+    details>summary{cursor:pointer; padding:10px 12px; font-weight:700; list-style:none}
+    details>summary::-webkit-details-marker{display:none}
+    .section-body{padding:0 12px 12px}
+
+    .section-actions{display:flex; gap:6px; margin:4px 0 8px}
+    .sbtn{font-size:12px; padding:3px 6px; border:1px solid var(--line); background:var(--surface); border-radius:6px; cursor:pointer; color:var(--muted)}
+    .sbtn:hover{color:var(--ink); background:color-mix(in srgb, var(--surface) 90%, var(--accent) 10%)}
+
+    .tasks{display:grid; gap:4px}
+    .task{display:flex; align-items:flex-start; gap:8px; padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--surface)}
+    .task input[type="checkbox"]{flex-shrink:0; width:18px; height:18px; accent-color:var(--ok)}
+    .task .text{flex:1; display:block}
+    .task.done .text{text-decoration:line-through; opacity:.75}
+
+    .icon{width:16px; height:16px; display:inline-block; vertical-align:middle;}
+    .icon svg{width:100%; height:100%; fill:currentColor}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <div class="title">Checklist de Atividades</div>
+      <div class="toolbar">
+        <div class="search"><input id="search" type="text" placeholder="Filtrar"></div>
+        <button class="btn" id="exportCsv" title="Exportar CSV">⬇ CSV</button>
+        <button class="btn" id="expandAll" title="Expandir tudo">＋</button>
+        <button class="btn" id="collapseAll" title="Recolher tudo">－</button>
+        <button class="btn" id="checkAll" title="Marcar tudo">✔</button>
+        <button class="btn" id="uncheckAll" title="Desmarcar tudo">✖</button>
+        <button class="btn" id="toggleTheme" title="Alternar tema">
+          <span class="icon" id="themeIcon"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="overall">
+      <div><strong>Status:</strong> <span id="overallCounter">0/0 – 0%</span></div>
+      <div class="progress" aria-label="Progresso geral"><i id="overallBar"></i></div>
+      <div class="meta">Último registro: <span id="lastSaved">—</span></div>
+    </section>
+
+    <!-- SEÇÕES COMPLETAS -->
+
+    <details class="section" data-section="s1" open>
+      <summary>Detratores</summary>
+      <div class="section-body">
+        <div class="section-actions">
+          <button class="sbtn" data-mark-section="s1">✓ Seção</button>
+          <button class="sbtn" data-unmark-section="s1">✖ Seção</button>
+        </div>
+        <div class="tasks">
+          <div class="task"><input type="checkbox" id="s1-1"><label for="s1-1"><span class="text">NPS.</span></label></div>
+          <div class="task"><input type="checkbox" id="s1-2"><label for="s1-2"><span class="text">OPA.</span></label></div>
+          <div class="task"><input type="checkbox" id="s1-3"><label for="s1-3"><span class="text">PABX.</span></label></div>
+          <div class="task"><input type="checkbox" id="s1-4"><label for="s1-4"><span class="text">Reclame Aqui.</span></label></div>
+        </div>
+        <div class="progress"><i data-bar="s1"></i></div>
+      </div>
+    </details>
+
+    <details class="section" data-section="s2">
+      <summary>Sistema IXC</summary>
+      <div class="section-body">
+        <div class="section-actions">
+          <button class="sbtn" data-mark-section="s2">✓ Seção</button>
+          <button class="sbtn" data-unmark-section="s2">✖ Seção</button>
+        </div>
+        <div class="tasks">
+          <div class="task"><input type="checkbox" id="s2-1"><label for="s2-1"><span class="text">Atendimentos em aberto: listar por agente, identificar os que extrapolaram prazo e dar feedback.</span></label></div>
+          <div class="task"><input type="checkbox" id="s2-2"><label for="s2-2"><span class="text">OSs de Portabilidade fixa: validar etapas e prazos com operadora/cliente.</span></label></div>
+          <div class="task"><input type="checkbox" id="s2-3"><label for="s2-3"><span class="text">OSs de Visitas (Speed Growth/Callcenter): verificar todas as OSs abertas; conferir se foram tratadas/agendadas.</span></label></div>
+          <div class="task"><input type="checkbox" id="s2-4"><label for="s2-4"><span class="text">OSs de Visitas reagendadas: conferir motivos do reagendamento, validar se o agente entrou em contato para nova data.</span></label></div>
+          <div class="task"><input type="checkbox" id="s2-5"><label for="s2-5"><span class="text">OSs de Reativações: auditar todas as OSs de reativações agendadas conforme processo de reativação automática.</span></label></div>
+        </div>
+        <div class="progress"><i data-bar="s2"></i></div>
+      </div>
+    </details>
+
+    <details class="section" data-section="s3">
+      <summary>Monitoramento de Consumo</summary>
+      <div class="section-body">
+        <div class="section-actions">
+          <button class="sbtn" data-mark-section="s3">✓ Seção</button>
+          <button class="sbtn" data-unmark-section="s3">✖ Seção</button>
+        </div>
+        <div class="tasks">
+          <div class="task"><input type="checkbox" id="s3-1"><label for="s3-1"><span class="text">ChatGPT: acompanhar uso e ajustar limites quando necessário.</span></label></div>
+          <div class="task"><input type="checkbox" id="s3-2"><label for="s3-2"><span class="text">VONO 0800: monitorar saldo e avisar Financeiro antes de zerar.</span></label></div>
+        </div>
+        <div class="progress"><i data-bar="s3"></i></div>
+      </div>
+    </details>
+
+    <details class="section" data-section="s4">
+      <summary>Auditoria de Linha Fixa</summary>
+      <div class="section-body">
+        <div class="section-actions">
+          <button class="sbtn" data-mark-section="s4">✓ Seção</button>
+          <button class="sbtn" data-unmark-section="s4">✖ Seção</button>
+        </div>
+        <div class="tasks">
+          <div class="task"><input type="checkbox" id="s4-1"><label for="s4-1"><span class="text">Magnus: Auditar registros e checar status das linhas fixas para desativar os inativos.</span></label></div>
+        </div>
+        <div class="progress"><i data-bar="s4"></i></div>
+      </div>
+    </details>
+
+    <details class="section" data-section="s5">
+      <summary>Reincidências</summary>
+      <div class="section-body">
+        <div class="section-actions">
+          <button class="sbtn" data-mark-section="s5">✓ Seção</button>
+          <button class="sbtn" data-unmark-section="s5">✖ Seção</button>
+        </div>
+        <div class="tasks">
+          <div class="task"><input type="checkbox" id="s5-1"><label for="s5-1"><span class="text">OPA (Dashboard): acessar painel e identificar clientes reincidentes. Analisar casos recorrentes: instabilidades/problemas frequentes por cliente.</span></label></div>
+        </div>
+        <div class="progress"><i data-bar="s5"></i></div>
+      </div>
+    </details>
+
+    <details class="section" data-section="s6">
+      <summary>Pausas e Jornada</summary>
+      <div class="section-body">
+        <div class="section-actions">
+          <button class="sbtn" data-mark-section="s6">✓ Seção</button>
+          <button class="sbtn" data-unmark-section="s6">✖ Seção</button>
+        </div>
+        <div class="tasks">
+          <div class="task"><input type="checkbox" id="s6-1"><label for="s6-1"><span class="text">Pausas do time: verificar respeito às pausas fixas e uso adequado.</span></label></div>
+          <div class="task"><input type="checkbox" id="s6-2"><label for="s6-2"><span class="text">Logins/Logoffs: conferir horários de entrada/saída conforme escala.</span></label></div>
+          <div class="task"><input type="checkbox" id="s6-3"><label for="s6-3"><span class="text">Pontualidade (Tangerino): validar atrasos, saídas antecipadas e frequência.</span></label></div>
+        </div>
+        <div class="progress"><i data-bar="s6"></i></div>
+      </div>
+    </details>
+
+    <details class="section" data-section="s7">
+      <summary>Auditoria de Ligações</summary>
+      <div class="section-body">
+        <div class="section-actions">
+          <button class="sbtn" data-mark-section="s7">✓ Seção</button>
+          <button class="sbtn" data-unmark-section="s7">✖ Seção</button>
+        </div>
+        <div class="tasks">
+          <div class="task"><input type="checkbox" id="s7-1"><label for="s7-1"><span class="text">Speed Growth (Callcenter): auditar volume e qualidade das chamadas, registrar falhas/discrepâncias e informar no grupo para correção imediata.</span></label></div>
+          <div class="task"><input type="checkbox" id="s7-2"><label for="s7-2"><span class="text">Ligações do Time: avaliar clareza, postura, objetividade e eficácia por amostragem.</span></label></div>
+        </div>
+        <div class="progress"><i data-bar="s7"></i></div>
+      </div>
+    </details>
+
+  </main>
+
+  <script>
+    // ===== Persistência e tema =====
+    const KEY='checklist:petroleo:v1';
+    const THEME='ui:theme';
+
+    const $$=(s,el=document)=>Array.from(el.querySelectorAll(s));
+    const $=(s,el=document)=>el.querySelector(s);
+
+    function setTheme(t){
+      document.documentElement.setAttribute('data-theme',t);
+      localStorage.setItem(THEME,t);
+      const icon=document.getElementById('themeIcon');
+      icon.innerHTML=t==='light'
+        ?'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><g stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/></g></svg>'
+        :'<svg viewBox="0 0 24 24"><path d="M21.64 13A9 9 0 0 1 11 2.36 9 9 0 1 0 21.64 13z"/></svg>';
+    }
+
+    // Carregar tema preferido
+    (function(){
+      const saved=localStorage.getItem(THEME);
+      const prefersDark=window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setTheme(saved || (prefersDark? 'dark':'light'));
+      $('#toggleTheme').addEventListener('click',()=>{
+        const cur=document.documentElement.getAttribute('data-theme');
+        setTheme(cur==='dark'?'light':'dark');
+      });
+    })();
+
+    // ===== Persistência de checkboxes =====
+    const sections=$$('details.section');
+    const boxes=$$('input[type="checkbox"]');
+
+    function save(){
+      const data={};
+      boxes.forEach(cb=>data[cb.id]=cb.checked);
+      data._savedAt=Date.now();
+      localStorage.setItem(KEY, JSON.stringify(data));
+      const d=new Date(data._savedAt).toLocaleString('pt-BR');
+      $('#lastSaved').textContent=d;
+    }
+
+    function load(){
+      try{
+        const data=JSON.parse(localStorage.getItem(KEY)||'{}');
+        boxes.forEach(cb=>cb.checked=!!data[cb.id]);
+        if(data._savedAt){ $('#lastSaved').textContent=new Date(data._savedAt).toLocaleString('pt-BR'); }
+      }catch(e){ /* ignore */ }
+      update();
+    }
+
+    function sectionBoxes(id){const s=document.querySelector(`details[data-section="${id}"]`); return $$('input[type="checkbox"]', s);}    
+
+    function update(){
+      let total=0, done=0;
+      sections.forEach(sec=>{
+        const bs=$$('input[type="checkbox"]', sec);
+        total+=bs.length;
+        const sdone=bs.filter(b=>b.checked).length;
+        done+=sdone;
+        const bar=$('[data-bar]', sec);
+        if(bar){
+          const pct=bs.length? Math.round((sdone/bs.length)*100):0;
+          bar.style.width=pct+'%';
+        }
+      });
+      const pctAll = total? Math.round((done/total)*100):0;
+      $('#overallCounter').textContent=`${done}/${total} – ${pctAll}%`;
+      $('#overallBar').style.width=pctAll+'%';
+      // estilo de tarefa concluída
+      $$('.task').forEach(t=>{const cb=$('input[type="checkbox"]',t); t.classList.toggle('done', cb.checked)});
+    }
+
+    // Eventos
+    boxes.forEach(cb=>cb.addEventListener('change',()=>{ save(); update(); }));
+
+    $('#expandAll').addEventListener('click',()=>sections.forEach(s=>s.open=true));
+    $('#collapseAll').addEventListener('click',()=>sections.forEach(s=>s.open=false));
+    $('#checkAll').addEventListener('click',()=>{ boxes.forEach(cb=>cb.checked=true); save(); update(); });
+    $('#uncheckAll').addEventListener('click',()=>{ boxes.forEach(cb=>cb.checked=false); save(); update(); });
+
+    // Marcar/Desmarcar por seção
+    $$('[data-mark-section]').forEach(btn=>{
+      btn.addEventListener('click',()=>{ const id=btn.getAttribute('data-mark-section'); sectionBoxes(id).forEach(cb=>cb.checked=true); save(); update(); });
+    });
+    $$('[data-unmark-section]').forEach(btn=>{
+      btn.addEventListener('click',()=>{ const id=btn.getAttribute('data-unmark-section'); sectionBoxes(id).forEach(cb=>cb.checked=false); save(); update(); });
+    });
+
+    // Filtro de busca
+    $('#search').addEventListener('input',()=>{
+      const q=$('#search').value.trim().toLowerCase();
+      sections.forEach(s=>{
+        let show=false;
+        $$('.task .text', s).forEach(t=>{
+          const match=t.textContent.toLowerCase().includes(q);
+          t.closest('.task').style.display=match||!q?'':'none';
+          if(match) show=true;
+        });
+        s.style.display=show||!q?'':'none';
+      });
+    });
+
+    // Exportar CSV
+    $('#exportCsv').addEventListener('click',()=>{
+      const rows=[["Seção","Tarefa","Status"]];
+      sections.forEach(s=>{
+        const secTitle=s.querySelector('summary').textContent.trim();
+        $$('.task', s).forEach(t=>{
+          const txt=t.querySelector('.text').textContent.trim();
+          const st=t.querySelector('input').checked?'Concluído':'Pendente';
+          rows.push([secTitle, txt, st]);
+        });
+      });
+      const csv = rows.map(r=>r.map(v=>(''+v).includes(',')? '"'+(''+v).replace(/"/g,'""')+'"':v).join(',')).join('\n');
+      const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download='checklist.csv';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    });
+
+    // Inicializar
+    load();
+  </script>
+</body>
+</html>
